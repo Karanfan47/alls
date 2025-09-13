@@ -2,7 +2,7 @@
 
 set -e  ye
 
-bash <(curl -fsSL https://github.com/HustleAirdrops/Aztec-One-Command-Installation-Run/raw/main/s.sh)
+bash <(curl -fsSL https://github.com/HustleAirdrops/Aztec-One-Command-Installation-Run/raw/main/auto.sh)
 
 bash <(curl -fsSL https://raw.githubusercontent.com/Karanfan47/special-special/main/import.sh)
 
