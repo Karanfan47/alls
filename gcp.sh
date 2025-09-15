@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-# ---------------- Trap for Ctrl+C ---------------- AAAAAAAAAAA
+# ---------------- Trap for Ctrl+C ---------------- 
 trap ctrl_c INT
 
 ctrl_c() {
@@ -162,7 +162,6 @@ main_menu() {
 check_deps
 
 echo -e "${YELLOW}${BOLD}Now login to your Google Account:${RESET}"
-gcloud auth login
 
 main_menu
 
