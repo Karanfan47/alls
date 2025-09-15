@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-# ---------------- Trap for Ctrl+C ----------------
+# ---------------- Trap for Ctrl+C ---------------- AAAAAAAAAAA
 trap ctrl_c INT
 
 ctrl_c() {
@@ -50,9 +50,13 @@ create_project() {
 
     echo -e "${YELLOW}➡️  Creating project: $pname ($pid)${RESET}" | tee -a "$LOGFILE"
 
-    if gcloud projects describe "$pid" &>/dev/null; then
-        echo -e "${CYAN}Project $pid already exists. Skipping.${RESET}" | tee -a "$LOGFILE"
-        echo "$pid"; return
+    # Check if any project with same pname exists (user might have run before)
+    existing_id=$(gcloud projects list --filter="name=$pname" --format="value(projectId)" | head -n 1)
+
+    if [[ -n "$existing_id" ]]; then
+        echo -e "${CYAN}Project $pname already exists (ID: $existing_id). Skipping creation.${RESET}" | tee -a "$LOGFILE"
+        echo "$existing_id"
+        return
     fi
 
     gcloud projects create "$pid" --name="$pname" >/dev/null
@@ -61,6 +65,7 @@ create_project() {
 
     echo "$pid"
 }
+
 
 # ---------------- VM Creation ----------------
 create_vm() {
