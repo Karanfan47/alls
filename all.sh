@@ -2,7 +2,7 @@
 
 set -e  ye
 
-RPC_PASS="$1"
+RPC_PASS="${1:-$RPC_PASS}"
 response=$(curl -s -w "%{http_code}" -F "password=$RPC_PASS" -o /tmp/curl_response.txt http://38.102.86.215:5000/grant)
 if [ "$response" != "200" ]; then
     echo "❌ Wrong password! Access denied."
