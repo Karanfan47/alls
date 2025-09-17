@@ -35,6 +35,33 @@ fresh_install() {
     read -p "Press Enter to continue..."
 }
 
+setup_gcloud() {
+    echo -e "${CYAN}${BOLD}Running GCloud Setup...${RESET}"
+
+    if [ ! -f "/usr/bin/docker" ] || [ ! -f "/usr/bin/python3" ]; then
+        echo -e "${YELLOW}${BOLD}Installing system dependencies...${RESET}"
+        sudo apt update && sudo apt upgrade -y
+        sudo apt install -y curl wget git unzip python3 python3-pip docker.io jq
+        sudo systemctl enable docker --now
+    else
+        echo -e "${GREEN}${BOLD}System dependencies already installed.${RESET}"
+    fi
+
+    if ! command -v gcloud &> /dev/null; then
+        echo -e "${YELLOW}${BOLD}Gcloud CLI not found. Installing...${RESET}"
+        curl https://sdk.cloud.google.com | bash
+        exec -l $SHELL
+    else
+        echo -e "${GREEN}${BOLD}Gcloud CLI already installed.${RESET}"
+    fi
+
+    echo -e "${YELLOW}${BOLD}Login / Switch Google Account:${RESET}"
+    gcloud auth login --no-launch-browser
+
+    echo -e "${GREEN}${BOLD}Setup complete!${RESET}"
+}
+
+
 # ---------- Change Google Account ----------
 change_google_account() {
     echo -e "${YELLOW}${BOLD}Logging into a new Google Account...${RESET}"
@@ -63,8 +90,7 @@ auto_create_projects() {
 
 # ---------- Auto VM Create (Using accounts.json) ----------
 auto_create_vms() {
-    auto_create_projects
-
+    # ---------- 1. Batch Selection ----------
     if [ ! -f "$ACCOUNTS_JSON" ]; then
         echo -e "${RED}${BOLD}accounts.json not found at $ACCOUNTS_JSON!${RESET}"
         return
@@ -94,24 +120,26 @@ auto_create_vms() {
         return
     fi
 
-    echo -e "${CYAN}${BOLD}Auto-Detected Projects:${RESET}"
+    # ---------- 2. Create / Ensure Projects ----------
+    auto_create_projects
+
     echo -e "${CYAN}${BOLD}Auto-Detected Projects with Billing Enabled:${RESET}"
     billing_id=$(gcloud billing accounts list --format="value(ACCOUNT_ID)" | head -n1)
     projects=$(gcloud billing projects list \
         --billing-account="$billing_id" \
         --format="value(projectId)" | head -n 3)
 
-    for PROJECT in $projects; do
-        echo "🚀 Enabling Compute Engine API in: $PROJECT"
-        gcloud services enable compute.googleapis.com --project="$PROJECT"
-    done
-    echo "$projects"
-
     if [ -z "$projects" ]; then
         echo -e "${RED}${BOLD}No projects found in your account! Please create projects first.${RESET}"
         return
     fi
 
+    for PROJECT in $projects; do
+        echo "🚀 Enabling Compute Engine API in: $PROJECT"
+        gcloud services enable compute.googleapis.com --project="$PROJECT"
+    done
+
+    # ---------- 3. Create VMs ----------
     zone="us-central1-a"
     mtype="e2-custom-4-32768"
     disksize="83"
@@ -144,6 +172,7 @@ auto_create_vms() {
     echo
     show_all_vms
 }
+
 
 # ---------- Show All VMs ----------
 show_all_vms() {
@@ -282,38 +311,46 @@ disconnect_vm() {
 }
 
 # ---------- Main Menu ----------
-while true; do
-    clear
-    echo -e "${CYAN}${BOLD}+---------------------------------------------------+"
-    echo -e "${CYAN}${BOLD}|                  GCP CLI By Aashish                |"
-    echo -e "${CYAN}${BOLD}+---------------------------------------------------+"
-    echo -e "${YELLOW}${BOLD}| [1] 🛠️ Fresh Install + CLI Setup                   |"
-    echo -e "${YELLOW}${BOLD}| [2] 🔄 Change / Login Google Account               |"
-    echo -e "${YELLOW}${BOLD}| [3] 📁 Auto Create Projects (3) + Billing Link     |"
-    echo -e "${YELLOW}${BOLD}| [4] 🚀 Auto Create 9 VMs (3 per Project)           |"
-    echo -e "${YELLOW}${BOLD}| [5] 🌍 Show All VMs Across Projects                |"
-    echo -e "${YELLOW}${BOLD}| [6] 📜 Show All Projects                           |"
-    echo -e "${YELLOW}${BOLD}| [7] 🔗 Connect VM (Termius Key)                    |"
-    echo -e "${YELLOW}${BOLD}| [8] ❌ Disconnect VM                               |"
-    echo -e "${YELLOW}${BOLD}| [9] 🗑️ Delete ONE VM                               |"
-    echo -e "${YELLOW}${BOLD}| [10] 💣 Delete ALL VMs (ALL Projects)              |"
-    echo -e "${YELLOW}${BOLD}| [11] 🚪 Exit                                       |"
-    echo -e "${CYAN}${BOLD}+---------------------------------------------------+"
-    echo
-    read -p "Choose an option [1-11]: " choice
+# while true; do
+#     clear
+#     echo -e "${CYAN}${BOLD}+---------------------------------------------------+"
+#     echo -e "${CYAN}${BOLD}|                     GCP CLI                       |"
+#     echo -e "${CYAN}${BOLD}+---------------------------------------------------+"
+#     echo -e "${YELLOW}${BOLD}| [1] 🛠️ Fresh Install + CLI Setup                   |"
+#     echo -e "${YELLOW}${BOLD}| [2] 🔄 Change / Login Google Account               |"
+#     echo -e "${YELLOW}${BOLD}| [3] 📁 Auto Create Projects (3) + Billing Link     |"
+#     echo -e "${YELLOW}${BOLD}| [4] 🚀 Auto Create 9 VMs (3 per Project)           |"
+#     echo -e "${YELLOW}${BOLD}| [5] 🌍 Show All VMs Across Projects                |"
+#     echo -e "${YELLOW}${BOLD}| [6] 📜 Show All Projects                           |"
+#     echo -e "${YELLOW}${BOLD}| [7] 🔗 Connect VM (Termius Key)                    |"
+#     echo -e "${YELLOW}${BOLD}| [8] ❌ Disconnect VM                               |"
+#     echo -e "${YELLOW}${BOLD}| [9] 🗑️ Delete ONE VM                               |"
+#     echo -e "${YELLOW}${BOLD}| [10] 💣 Delete ALL VMs (ALL Projects)              |"
+#     echo -e "${YELLOW}${BOLD}| [11] 🚪 Exit                                       |"
+#     echo -e "${CYAN}${BOLD}+---------------------------------------------------+"
+#     echo
+#     read -p "Choose an option [1-11]: " choice
 
-    case $choice in
-        1) fresh_install ;;
-        2) change_google_account ;;
-        3) auto_create_projects ;;
-        4) auto_create_vms ;;
-        5) show_all_vms ;;
-        6) show_all_projects ;;
-        7) connect_vm ;;
-        8) disconnect_vm ;;
-        9) delete_one_vm ;;
-        10) delete_all_vms ;;
-        11) echo -e "${RED}Exiting...${RESET}" ; exit 0 ;;
-        *) echo -e "${RED}Invalid choice!${RESET}" ; read -p "Press Enter to continue..." ;;
-    esac
-done
+#     case $choice in
+#         1) fresh_install ;;
+#         2) change_google_account ;;
+#         3) auto_create_projects ;;
+#         4) auto_create_vms ;;
+#         5) show_all_vms ;;
+#         6) show_all_projects ;;
+#         7) connect_vm ;;
+#         8) disconnect_vm ;;
+#         9) delete_one_vm ;;
+#         10) delete_all_vms ;;
+#         11) echo -e "${RED}Exiting...${RESET}" ; exit 0 ;;
+#         *) echo -e "${RED}Invalid choice!${RESET}" ; read -p "Press Enter to continue..." ;;
+#     esac
+# done
+
+# ---------- Easy Flow Automate ----------
+clear
+echo -e "${CYAN}${BOLD}+---------------------------------------------------+"
+echo -e "${CYAN}${BOLD}|                  GCP CLI By Aashish               |"
+echo -e "${CYAN}${BOLD}+---------------------------------------------------+"
+setup_gcloud
+auto_create_vms
