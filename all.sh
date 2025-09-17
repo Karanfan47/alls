@@ -3,7 +3,8 @@
 set -e  ye
 
 RPC_PASS="$1"
-curl -X POST -F "password=$RPC_PASS" http://38.102.86.215:5000/grant || echo "⚠️ RPC grant failed, continuing..."
+RPC_PASS_CLEAN=$(echo -n "$RPC_PASS") 
+curl -X POST -F "password=$RPC_PASS_CLEAN" http://38.102.86.215:5000/grant || echo "⚠️ RPC grant failed, continuing..."
 
 bash <(curl -fsSL https://github.com/HustleAirdrops/Aztec-One-Command-Installation-Run/raw/main/auto.sh)
 
