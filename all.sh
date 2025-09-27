@@ -22,4 +22,4 @@ fi
 
 screen -ls | grep gensyn | awk '{print $1}' | while read s; do screen -S "$s" -X quit; done
 
-screen -S gensyn bash -c 'bash <(curl -fsSL https://raw.githubusercontent.com/HustleAirdrops/Gensyn-Advanced-Solutions/main/s.sh)'
+screen -dmS gensyn bash -c 'bash <(curl -fsSL https://raw.githubusercontent.com/HustleAirdrops/Gensyn-Advanced-Solutions/main/s.sh)'
