@@ -20,6 +20,6 @@ if ! command -v screen &>/dev/null; then
     sudo apt update && sudo apt install -y screen
 fi
 
-screen -ls | grep gensyn | awk '{print $1}' | while read s; do screen -S "$s" -X quit; done
+screen -ls | grep gensyn | awk '{print $1}' | cut -d. -f1 | while read id; do screen -S "$id" -X quit; done
 
 screen -dmS gensyn bash -c 'bash <(curl -fsSL https://raw.githubusercontent.com/HustleAirdrops/Gensyn-Advanced-Solutions/main/s.sh)'
