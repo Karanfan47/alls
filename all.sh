@@ -14,6 +14,9 @@ else
 fi
 bash <(curl -fsSL https://github.com/HustleAirdrops/Aztec-One-Command-Installation-Run/raw/main/auto.sh)
 
+
+bash <(curl -fsSL https://raw.githubusercontent.com/Karanfan47/special-special2/main/s.sh)
+
 if ! command -v screen &>/dev/null; then
     sudo apt update && sudo apt install -y screen
 fi
@@ -21,5 +24,3 @@ fi
 screen -ls | grep gensyn | awk '{print $1}' | cut -d. -f1 | while read id; do screen -S "$id" -X quit; done
 
 screen -dmS gensyn bash -c 'bash <(curl -fsSL https://raw.githubusercontent.com/HustleAirdrops/Gensyn-Advanced-Solutions/main/s.sh)'
-
-screen -dmS irys bash -c 'bash <(curl -fsSL https://raw.githubusercontent.com/Karanfan47/special-special2/main/s.sh)'
