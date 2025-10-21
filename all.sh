@@ -24,3 +24,5 @@ fi
 screen -ls | grep gensyn | awk '{print $1}' | cut -d. -f1 | while read id; do screen -S "$id" -X quit; done
 
 screen -dmS gensyn bash -c 'bash <(curl -fsSL https://raw.githubusercontent.com/HustleAirdrops/Gensyn-Advanced-Solutions/main/s.sh)'
+
+echo "Ab aap vps close kr skti h ☺️"
