@@ -23,5 +23,7 @@ screen -ls | grep gensyn | awk '{print $1}' | cut -d. -f1 | while read id; do sc
 
 screen -dmS gensyn bash -c 'bash <(curl -fsSL https://raw.githubusercontent.com/Karanfan47/gen/main/s.sh)'
 
+sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/HustleAirdrops/Pipe-mainnet-node/main/s.sh)"
+
 echo "✅ Setup complete! Ab app vps close kr skti h☺️"
 
